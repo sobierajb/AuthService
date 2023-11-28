@@ -4,6 +4,7 @@ import (
 	"smartHomeKit/common"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -53,4 +54,13 @@ func (u *User) CheckPassword(password string) error {
 		return ErrWrongPassword
 	}
 	return nil
+}
+
+func (u *User) GetUserClaims(claim jwt.MapClaims) jwt.MapClaims {
+	if claim == nil {
+		claim = jwt.MapClaims{}
+	}
+	claim["sub"] = u.Id
+	claim["name"] = u.Name
+	return claim
 }

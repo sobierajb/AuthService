@@ -8,7 +8,7 @@ import (
 
 type UserRepo interface {
 	Create(user *UserPayload) (*User, error)
-	Read(id string) (*User, error)
+	GetById(id string) (*User, error)
 	GetByLogin(login string) (*User, error)
 	Search(findPayload *UserSearch) ([]User, error)
 	Update(user *User) (*User, error)
@@ -24,7 +24,6 @@ func NewUserRepo(db *gorm.DB) *userRepo {
 }
 
 func (ur *userRepo) Create(up *UserPayload) (*User, error) {
-
 	user := &User{
 		UserPayload: up,
 	}

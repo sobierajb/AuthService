@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/url"
 )
@@ -50,9 +49,9 @@ func decTokenRequest(ctx context.Context, r *http.Request) (interface{}, error) 
 	switch grantType {
 	case grAuthorisationCode:
 		// crate tokenRequest object
-		tr := &TokenRequest[UserTokenRequest]{
+		tr := &TokenRequest[AuthCodeRequest]{
 			GrantType: grantType,
-			Data: &UserTokenRequest{
+			Data: &AuthCodeRequest{
 				ClientId:     formValues.Get("client_id"),
 				CodeVerifier: formValues.Get("code_verifier"),
 				Code:         formValues.Get("code"),
@@ -60,36 +59,24 @@ func decTokenRequest(ctx context.Context, r *http.Request) (interface{}, error) 
 		}
 		return tr, nil
 	case grClientCredentials:
-		tr := &TokenRequest[ServiceTokenRequest]{
+		tr := &TokenRequest[ClientCredentialsRequest]{
 			GrantType: grantType,
-			Data: &ServiceTokenRequest{
+			Data: &ClientCredentialsRequest{
 				ClientId:     formValues.Get("client_id"),
 				ClientSecret: formValues.Get("client_secret"),
 			},
 		}
 		return tr, nil
 	case grRefreshToken:
-		return "", nil
+		tr := &TokenRequest[RefreshTokenRequest]{
+			GrantType: grantType,
+			Data: &RefreshTokenRequest{
+				ClientId:     formValues.Get("client_id"),
+				RefreshToken: formValues.Get("refresh_token"),
+			},
+		}
+		return tr, nil
 	default:
 		return nil, ErrUnknownGrantType
 	}
-}
-
-func decUserTokenReq(ctx context.Context, r *http.Request) (interface{}, error) {
-	var req UserTokenRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		return nil, err
-	}
-	return req, nil
-}
-
-func decServiceTokenReq(ctx context.Context, r *http.Request) (interface{}, error) {
-	var req ServiceTokenRequest
-
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		return nil, err
-	}
-	return req, nil
 }

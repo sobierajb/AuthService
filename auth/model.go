@@ -2,8 +2,6 @@ package auth
 
 import (
 	"net/url"
-
-	"github.com/golang-jwt/jwt"
 )
 
 const (
@@ -14,6 +12,7 @@ const (
 
 type UserAuthRequest struct {
 	Challenge   string
+	Method      string
 	ClientId    string
 	RedirectUri *url.URL
 	State       string
@@ -31,25 +30,29 @@ type TokenRequest[T interface{}] struct {
 	Data      *T
 }
 
-type UserTokenRequest struct {
+type AuthCodeRequest struct {
 	ClientId     string
 	CodeVerifier string
 	Code         string
 }
 
-type ServiceTokenRequest struct {
+type ClientCredentialsRequest struct {
 	ClientId     string
 	ClientSecret string
 }
 
-type TokenResponse struct {
-	AccessToken  jwt.Token
-	RefreshToken jwt.Token
-	Expires      int
+type RefreshTokenRequest struct {
+	ClientId     string
+	RefreshToken string
 }
 
 type LoginRequest struct {
 	Login    string
 	Password string
 	*UserAuthRequest
+}
+
+type TokenResponse struct {
+	AccessToken  string
+	RefreshToken string
 }

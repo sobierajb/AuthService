@@ -1,79 +1,41 @@
 package certRepo
 
-import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-)
+import "time"
 
-type KeyType int
+type AlghorythmType string
 
 const (
-	NoValue KeyType = iota
-	RSA256
-	RSA384
-	RSA512
+	RSA256   AlghorythmType = "RS256"
+	RSA384   AlghorythmType = "RS384"
+	RSA512   AlghorythmType = "RS512"
+	HMAC256  AlghorythmType = "HS256"
+	HMAC384  AlghorythmType = "HS384"
+	HMAC512  AlghorythmType = "HS512"
+	ECDSA256 AlghorythmType = "ES256"
+	ECDSA384 AlghorythmType = "ES384"
+	ECDSA512 AlghorythmType = "ES512"
+	EdDSA    AlghorythmType = "EdDSA"
 )
 
-type Certificate struct {
-	Id   string
-	Type KeyType
-	Key  []byte
+type CertificateData struct {
+	Id         string
+	AlgType    AlghorythmType
+	Key        []byte
+	Thumbprint string
+	CreatedAt  time.Time
+}
+
+type certifcatePayload struct {
+	AlghorythmType
 }
 
 type PublicCertResponse struct {
-	Alg string // cryptographic alghorythm used with key
-	Kty string // familly of cryptographic alghorytm
-	N   string //modulus for RSA public
-	E   string //exponent for RSA public
-	X5t string //The thumbprint
-	X5c string //x.509 chain
-}
-
-func (c *Certificate) GenerateRsa(ky KeyType) error {
-	var key *rsa.PrivateKey
-	var err error
-	switch ky {
-	case RSA256:
-		key, err = rsa.GenerateKey(rand.Reader, 2048)
-		c.Type = RSA256
-	case RSA384:
-		key, err = rsa.GenerateKey(rand.Reader, 3072)
-		c.Type = RSA384
-	case RSA512:
-		key, err = rsa.GenerateKey(rand.Reader, 4096)
-		c.Type = RSA512
-	default:
-		return ErrWrongKeyType
-	}
-
-	if err != nil {
-		return err
-	}
-	// Store key as String of bytes.
-	marshal, err := x509.MarshalPKCS8PrivateKey(key)
-	if err != nil {
-		return err
-	}
-	c.Key = marshal
-	return nil
-}
-
-func (c *Certificate) GetRsaPrivateKey() (*rsa.PrivateKey, error) {
-	if c.Type != RSA256 {
-		return nil, ErrWrongKeyType
-	}
-	key, err := x509.ParsePKCS8PrivateKey(c.Key)
-	if err != nil {
-		return nil, err
-	}
-	return key.(*rsa.PrivateKey), nil
-}
-
-func (c *Certificate) GetRsaPuiblicKey() (*rsa.PublicKey, error) {
-	privateKey, err := c.GetRsaPrivateKey()
-	if err != nil {
-		return nil, err
-	}
-	return &privateKey.PublicKey, nil
+	Alg string `json:"alg"` // cryptographic alghorythm used with key
+	Kty string `json:"kty"` // familly of cryptographic alghorytm
+	N   string `json:"n"`   //modulus for RSA public
+	E   string `json:"e"`   //exponent for RSA public
+	X5t string `json:"x5t"` //The thumbprint
+	X5c string `json:"x5c"` //x.509 chain
+	Use string `json:"use"`
+	Kid string `json:"kid"`
 }

@@ -23,7 +23,7 @@ func GetAuthHttpRouter(as AuthService) *chi.Mux {
 
 	tokenRequest := kithttp.NewServer(
 		makeTokenRequest(as),
-		decServiceTokenReq,
+		decTokenRequest,
 		encTokenRes,
 	)
 
